@@ -189,10 +189,10 @@
       flashcards = Array.from(document.querySelectorAll('.flashcard'));
 
       function showCard(index) {
-        });
         flashcards.forEach((card, i) => {
           card.style.display = i === index ? 'block' : 'none';
           card.classList.remove('flipped');
+        });
       }
 
       function filterCards(filterType) {
