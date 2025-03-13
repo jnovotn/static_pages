@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trig Identities Flashcards</title>
+  <style>
+    .container {
+      width: 400px;
+      margin: 50px auto;
+      text-align: center;
+    }
+
+    .flashcard {
+      width: 300px;
+      height: 200px;
+      margin: 20px auto;
+      border: 1px solid #ccc;
+      perspective: 1000px;
+      position: relative;
+    }
+
+    .flashcard .front, .flashcard .back {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      backface-visibility: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-color: #f0f0f0;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .flashcard .back {
+      transform: rotateY(180deg);
+    }
+
+    .flashcard.flipped .front {
+      transform: rotateY(180deg);
+    }
+
+    .flashcard.flipped .back {
+      transform: rotateY(0deg);
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="flashcard-container">
+      <div class="flashcard" data-cardtype="double-angle">
+        <div class="front">
+          <h2>Double Angle: sin(2θ)</h2>
+        </div>
+        <div class="back">
+          <p>2sin(θ)cos(θ)</p>
+        </div>
+      </div>
+
+      <div class="flashcard" data-cardtype="double-angle">
+        <div class="front">
+          <h2>Double Angle: cos(2θ)</h2>
+        </div>
+        <div class="back">
+          <p>cos²(θ) - sin²(θ)<br>
+             2cos²(θ) - 1<br>
+             1 - 2sin²(θ)</p>
+        </div>
+      </div>
+
+      <div class="flashcard" data-cardtype="double-angle">
+        <div class="front">
+          <h2>Double Angle: tan(2θ)</h2>
+        </div>
+        <div class="back">
+          <p>2tan(θ) / (1 - tan²(θ))</p>
+        </div>
+      </div>
+
+      <div class="flashcard" data-cardtype="half-angle">
+        <div class="front">
+          <h2>Half Angle: sin(θ/2)</h2>
+        </div>
+        <div class="back">
+          <p>±√((1 - cos(θ)) / 2)</p>
+        </div>
+      </div>
+
+      <div class="flashcard" data-cardtype="half-angle">
+        <div class="front">
+          <h2>Half Angle: cos(θ/2)</h2>
+        </div>
+        <div class="back">
+          <p>±√((1 + cos(θ)) / 2)</p>
+        </div>
+      </div>
+
+      <div class="flashcard" data-cardtype="half-angle">
+        <div class="front">
+          <h2>Half Angle: tan(θ/2)</h2>
+        </div>
+        <div class="back">
+          <p>±√((1 - cos(θ)) / (1 + cos(θ)))<br>
+             (1 - cos(θ)) / sin(θ)<br>
+             sin(θ) / (1 + cos(θ))</p>
+        </div>
+      </div>
+
+      <div class="flashcard" data-cardtype="angle-addition">
+        <div class="front">
+          <h2>Angle Addition: sin(α + β)</h2>
+        </div>
+        <div class="back">
+          <p>sin(α)cos(β) + cos(α)sin(β)</p>
+        </div>
+      </div>
+
+      <div class="flashcard" data-cardtype="angle-addition">
+        <div class="front">
+          <h2>Angle Addition: cos(α + β)</h2>
+        </div>
+        <div class="back">
+          <p>cos(α)cos(β) - sin(α)sin(β)</p>
+        </div>
+      </div>
+
+      <div class="flashcard" data-cardtype="angle-addition">
+        <div class="front">
+          <h2>Angle Addition: tan(α + β)</h2>
+        </div>
+        <div class="back">
+          <p>(tan(α) + tan(β)) / (1 - tan(α)tan(β))</p>
+        </div>
+      </div>
+
+      <div class="flashcard" data-cardtype="angle-addition">
+        <div class="front">
+          <h2>Angle Subtraction: sin(α - β)</h2>
+        </div>
+        <div class="back">
+          <p>sin(α)cos(β) - cos(α)sin(β)</p>
+        </div>
+      </div>
+
+      <div class="flashcard" data-cardtype="angle-addition">
+        <div class="front">
+          <h2>Angle Subtraction: cos(α - β)</h2>
+        </div>
+        <div class="back">
+          <p>cos(α)cos(β) + sin(α)sin(β)</p>
+        </div>
+      </div>
+
+      <div class="flashcard" data-cardtype="angle-addition">
+        <div class="front">
+          <h2>Angle Subtraction: tan(α - β)</h2>
+        </div>
+        <div class="back">
+          <p>(tan(α) - tan(β)) / (1 + tan(α)tan(β))</p>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="prev-btn">Previous</button>
+      <button id="next-btn">Next</button>
+      <button id="show-answer-btn">Show Answer</button>
+      <select id="filter">
+        <option value="all">All</option>
+        <option value="double-angle">Double Angle</option>
+        <option value="half-angle">Half Angle</option>
+        <option value="angle-addition">Angle Addition</option>
+      </select>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const flashcardContainer = document.getElementById('flashcard-container');
+      const prevBtn = document.getElementById('prev-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const showAnswerBtn = document.getElementById('show-answer-btn');
+      const filterSelect = document.getElementById('filter');
+      let currentCardIndex = 0;
+      let flashcards = [];
+
+      flashcards = Array.from(document.querySelectorAll('.flashcard'));
+
+      function showCard(index) {
+        });
+        flashcards.forEach((card, i) => {
+          card.style.display = i === index ? 'block' : 'none';
+          card.classList.remove('flipped');
+      }
+
+      function filterCards(filterType) {
+        currentCardIndex = 0;
+        flashcards.forEach(card => {
+          if (filterType === 'all' || card.dataset.cardtype === filterType) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+        flashcards = Array.from(document.querySelectorAll(`.flashcard[style*="display: block;"]`));
+        showCard(currentCardIndex);
+      }
+
+      showCard(currentCardIndex);
+
+      nextBtn.addEventListener('click', () => {
+        currentCardIndex = (currentCardIndex + 1) % flashcards.length;
+        showCard(currentCardIndex);
+      });
+
+      prevBtn.addEventListener('click', () => {
+        currentCardIndex = (currentCardIndex - 1 + flashcards.length) % flashcards.length;
+        showCard(currentCardIndex);
+      });
+
+      showAnswerBtn.addEventListener('click', () => {
+        flashcards[currentCardIndex].classList.toggle('flipped');
+      });
+
+      filterSelect.addEventListener('change', () => {
+        filterCards(filterSelect.value);
+      });
+    });
+  </script>
+</body>
+</html>
