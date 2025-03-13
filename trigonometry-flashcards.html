@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trigonometric Identities Flashcards</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .category-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .category-btn {
+            padding: 8px 16px;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .category-btn.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .flashcard {
+            perspective: 1000px;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flipped .card {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: white;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: #f9f9f9;
+        }
+        .nav-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .nav-btn:hover {
+            background-color: #45a049;
+        }
+        .nav-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .formula {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #666;
+        }
+        .progress {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Trigonometric Identities Flashcards</h1>
+    
+    <div class="category-selector">
+        <button class="category-btn active" data-category="all">All</button>
+        <button class="category-btn" data-category="double">Double Angle</button>
+        <button class="category-btn" data-category="half">Half Angle</button>
+        <button class="category-btn" data-category="addition">Angle Addition</button>
+    </div>
+    
+    <div class="flashcard">
+        <div class="card">
+            <div class="card-face card-front">
+                <div class="card-title">Click to reveal the formula</div>
+                <div class="formula" id="question"></div>
+            </div>
+            <div class="card-face card-back">
+                <div class="card-title">Formula</div>
+                <div class="formula" id="answer"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button class="nav-btn" id="prev-btn">Previous</button>
+        <button class="nav-btn" id="flip-btn">Flip Card</button>
+        <button class="nav-btn" id="next-btn">Next</button>
+    </div>
+    
+    <div class="progress" id="progress"></div>
+    
+    <script>
+        // Flashcard data
+        const flashcards = [
+            // Double Angle Formulas
+            {
+                question: "sin(2θ) = ?",
+                answer: "sin(2θ) = 2sin(θ)cos(θ)",
+                category: "double"
+            },
+            {
+                question: "cos(2θ) = ?",
+                answer: "cos(2θ) = cos²(θ) - sin²(θ)",
+                category: "double"
+            },
+            {
+                question: "cos(2θ) (alternative form) = ?",
+                answer: "cos(2θ) = 2cos²(θ) - 1",
+                category: "double"
+            },
+            {
+                question: "cos(2θ) (second alternative form) = ?",
+                answer: "cos(2θ) = 1 - 2sin²(θ)",
+                category: "double"
+            },
+            {
+                question: "tan(2θ) = ?",
+                answer: "tan(2θ) = 2tan(θ)/(1 - tan²(θ))",
+                category: "double"
+            },
+            
+            // Half Angle Formulas
+            {
+                question: "sin(θ/2) = ?",
+                answer: "sin(θ/2) = ±√[(1 - cos(θ))/2]",
+                category: "half"
+            },
+            {
+                question: "cos(θ/2) = ?",
+                answer: "cos(θ/2) = ±√[(1 + cos(θ))/2]",
+                category: "half"
+            },
+            {
+                question: "tan(θ/2) = ?",
+                answer: "tan(θ/2) = (1 - cos(θ))/sin(θ)",
+                category: "half"
+            },
+            {
+                question: "tan(θ/2) (alternative form) = ?",
+                answer: "tan(θ/2) = sin(θ)/(1 + cos(θ))",
+                category: "half"
+            },
+            
+            // Angle Addition Formulas
+            {
+                question: "sin(α + β) = ?",
+                answer: "sin(α + β) = sin(α)cos(β) + cos(α)sin(β)",
+                category: "addition"
+            },
+            {
+                question: "sin(α - β) = ?",
+                answer: "sin(α - β) = sin(α)cos(β) - cos(α)sin(β)",
+                category: "addition"
+            },
+            {
+                question: "cos(α + β) = ?",
+                answer: "cos(α + β) = cos(α)cos(β) - sin(α)sin(β)",
+                category: "addition"
+            },
+            {
+                question: "cos(α - β) = ?",
+                answer: "cos(α - β) = cos(α)cos(β) + sin(α)sin(β)",
+                category: "addition"
+            },
+            {
+                question: "tan(α + β) = ?",
+                answer: "tan(α + β) = [tan(α) + tan(β)]/[1 - tan(α)tan(β)]",
+                category: "addition"
+            },
+            {
+                question: "tan(α - β) = ?",
+                answer: "tan(α - β) = [tan(α) - tan(β)]/[1 + tan(α)tan(β)]",
+                category: "addition"
+            }
+        ];
+        
+        let currentCardIndex = 0;
+        let filteredCards = [...flashcards];
+        let isFlipped = false;
+        
+        const questionEl = document.getElementById('question');
+        const answerEl = document.getElementById('answer');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const flipBtn = document.getElementById('flip-btn');
+        const progressEl = document.getElementById('progress');
+        const flashcardEl = document.querySelector('.flashcard');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        
+        // Initialize
+        function updateCard() {
+            const card = filteredCards[currentCardIndex];
+            questionEl.textContent = card.question;
+            answerEl.textContent = card.answer;
+            
+            // Update progress
+            progressEl.textContent = `Card ${currentCardIndex + 1} of ${filteredCards.length}`;
+            
+            // Update button states
+            prevBtn.disabled = currentCardIndex === 0;
+            nextBtn.disabled = currentCardIndex === filteredCards.length - 1;
+            
+            // Reset card flip
+            isFlipped = false;
+            flashcardEl.classList.remove('flipped');
+        }
+        
+        // Event Listeners
+        prevBtn.addEventListener('click', () => {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                updateCard();
+            }
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            if (currentCardIndex < filteredCards.length - 1) {
+                currentCardIndex++;
+                updateCard();
+            }
+        });
+        
+        flipBtn.addEventListener('click', () => {
+            isFlipped = !isFlipped;
+            flashcardEl.classList.toggle('flipped');
+        });
+        
+        flashcardEl.addEventListener('click', () => {
+            isFlipped = !isFlipped;
+            flashcardEl.classList.toggle('flipped');
+        });
+        
+        // Category filtering
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update active button
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const category = btn.getAttribute('data-category');
+                
+                // Filter cards
+                if (category === 'all') {
+                    filteredCards = [...flashcards];
+                } else {
+                    filteredCards = flashcards.filter(card => card.category === category);
+                }
+                
+                // Reset to first card
+                currentCardIndex = 0;
+                updateCard();
+            });
+        });
+        
+        // Start with first card
+        updateCard();
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && currentCardIndex > 0) {
+                currentCardIndex--;
+                updateCard();
+            } else if (e.key === 'ArrowRight' && currentCardIndex < filteredCards.length - 1) {
+                currentCardIndex++;
+                updateCard();
+            } else if (e.key === ' ' || e.key === 'Enter') {
+                isFlipped = !isFlipped;
+                flashcardEl.classList.toggle('flipped');
+            }
+        });
+    </script>
+</body>
+</html>
