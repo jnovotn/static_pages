@@ -363,6 +363,15 @@
 
         // Initial resize and start the animation loop.
         resizeRendererToDisplaySize(renderer);
+
+
+        // Add a default cube to the scene
+        const geometry = new THREE.BoxGeometry(2, 2, 2);
+        const material = new THREE.MeshNormalMaterial();
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+        loadedModel = cube; // Set the loaded model to the cube so it rotates
+
         animate();
     </script>
 </body>
