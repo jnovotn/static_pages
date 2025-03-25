@@ -7,7 +7,6 @@
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.jsdelivr.net/npm/three@0.139.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.139.0/examples/js/controls/VRControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.139.0/examples/js/effects/VREffect.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.139.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.139.0/examples/js/loaders/STLLoader.js"></script>
@@ -224,7 +223,9 @@
             }
 
             if (isVRMode) {
-                vrControls.update();
+                if (vrControls) {
+                  vrControls.update();
+                }
                 renderer.render(scene, camera); // Use standard render in VR mode.  VREffect is often for older WebVR.
             } else {
                 if (orbitControls) { // Check if orbitControls is initialized
@@ -260,7 +261,7 @@
 
                 // Set up the Three.js VR components.
                 //vrEffect = new THREE.VREffect(renderer); // Remove VREffect
-                vrControls = new THREE.VRControls(camera); // Use VRControls
+                //vrControls = new THREE.VRControls(camera); // Remove VRControls -  Use the session instead
                 //vrEffect.setVRDevice(navigator.xr.getVRDisplay()); // Deprecated, and may cause errors
 
                 session.updateRenderState({ baseLayer: new XRWebGLLayer(session, renderer.domElement) });
@@ -273,6 +274,9 @@
                     orbitControls.enabled = false; // Disable OrbitControls in VR mode
                 }
 
+                // Create VR controls, passing in the session
+                vrControls = new THREE.VRControls(camera, session);
+
                 session.addEventListener('end', () => {
                     isVRMode = false;
                     vrButton.textContent = 'Enter VR';
@@ -282,6 +286,7 @@
                      if (orbitControls) {
                         orbitControls.enabled = true; // Re-enable OrbitControls when exiting VR
                     }
+                    vrControls = null; // Dispose of controls.
                 });
 
 
