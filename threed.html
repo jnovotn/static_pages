@@ -264,7 +264,8 @@
                 //vrControls = new THREE.VRControls(camera); // Remove VRControls -  Use the session instead
                 //vrEffect.setVRDevice(navigator.xr.getVRDisplay()); // Deprecated, and may cause errors
 
-                session.updateRenderState({ baseLayer: new XRWebGLLayer(session, renderer.domElement) });
+                const glLayer = new XRWebGLLayer(session, renderer.getContext()); // Pass the renderer's context
+                session.updateRenderState({ baseLayer: glLayer });
                 session.requestAnimationFrame(animate); // Start the animation loop.
 
                 // Set the session for the renderer and camera
