@@ -225,7 +225,7 @@
 
             if (isVRMode) {
                 vrControls.update();
-                vrEffect.render(scene, camera);
+                renderer.render(scene, camera); // Use standard render in VR mode.  VREffect is often for older WebVR.
             } else {
                 if (orbitControls) { // Check if orbitControls is initialized
                     orbitControls.update();
@@ -259,9 +259,9 @@
                 vrButton.onclick = endVR;
 
                 // Set up the Three.js VR components.
-                vrEffect = new THREE.VREffect(renderer);
+                //vrEffect = new THREE.VREffect(renderer); // Remove VREffect
                 vrControls = new THREE.VRControls(camera); // Use VRControls
-                vrEffect.setVRDevice(navigator.xr.getVRDisplay()); // Deprecated, but needed for older implementations.
+                //vrEffect.setVRDevice(navigator.xr.getVRDisplay()); // Deprecated, and may cause errors
 
                 session.updateRenderState({ baseLayer: new XRWebGLLayer(session, renderer.domElement) });
                 session.requestAnimationFrame(animate); // Start the animation loop.
