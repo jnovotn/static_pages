@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebXR STL Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #374151;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+        }
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        canvas {
+            display: block;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 0.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        #xr-button {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 101;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container"></div>
+    <div id="ui">
+        <p id="status-text" class="text-lg font-semibold">Loading 3D model...</p>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+        import { ARButton } from 'three/addons/webxr/ARButton.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        let camera, scene, renderer;
+        let model;
+        const statusText = document.getElementById('status-text');
+        const container = document.getElementById('container');
+        const xrButtonContainer = document.getElementById('xr-button');
+
+        function init() {
+            // Setup scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xcccccc);
+
+            // Setup camera
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 0.5, 2);
+
+            // Setup renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1;
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(0, 5, 5).normalize();
+            scene.add(directionalLight);
+
+            // Add AR Button
+            const arButton = ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] });
+            arButton.classList.add('px-6', 'py-3', 'bg-blue-600', 'text-white', 'rounded-full', 'shadow-lg', 'hover:bg-blue-700', 'transition-colors', 'duration-200');
+            arButton.id = 'xr-button';
+            document.body.appendChild(arButton);
+            
+            // Add OrbitControls for desktop interaction
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 0.5, 0);
+            controls.update();
+
+            // Load the STL model
+            const loader = new STLLoader();
+            // Using a public STL model from the three.js GitHub repository
+            const stlUrl = 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/stl/pr2_head_pan.stl';
+            loader.load(stlUrl, function (geometry) {
+                // Center the geometry
+                geometry.computeBoundingBox();
+                const center = new THREE.Vector3();
+                geometry.boundingBox.getCenter(center);
+                geometry.translate(-center.x, -center.y, -center.z);
+
+                const material = new THREE.MeshStandardMaterial({ color: 0x0055ff, roughness: 0.5, metalness: 0.5 });
+                model = new THREE.Mesh(geometry, material);
+                model.scale.set(0.01, 0.01, 0.01); // Scale to a reasonable size for XR
+                
+                scene.add(model);
+                
+                statusText.textContent = 'Model loaded. Press the AR button to view in AR.';
+
+                // In XR, we'll place the model at the hit test location
+                renderer.xr.addEventListener('sessionstart', () => {
+                    if (model) {
+                        model.position.set(0, -0.5, -1); // Initial position in VR/AR
+                    }
+                });
+            },
+            // On progress
+            function (xhr) {
+                const progress = Math.round(xhr.loaded / xhr.total * 100);
+                statusText.textContent = `Loading 3D model: ${progress}%`;
+            },
+            // On error
+            function (error) {
+                console.error('An error happened while loading the model:', error);
+                statusText.textContent = 'Error loading model.';
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Start the animation loop after the renderer is initialized
+            renderer.setAnimationLoop(animate);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            renderer.render(scene, camera);
+        }
+        
+        // Initialize everything on window load
+        window.onload = init;
+    </script>
+</body>
+</html>
